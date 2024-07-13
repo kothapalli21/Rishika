@@ -1,61 +1,82 @@
-body { 
-	padding: 0; 
-	margin: 0; 
-	font-family: verdana; 
-} 
+let weather = {
+    apiKey: "01d9f2d66b5fb9c863aa86b5cb001cd2",
+    fetchWeather: function (city) {
+      fetch(
+        "https://api.openweathermap.org/data/2.5/weather?q=" +
+          city +
+          "&units=metric&appid=" +
+          this.apiKey
+      )
+        .then((response) => {
+          if (!response.ok) {
+            alert("No weather found.");
+            throw new Error("No weather found.");
+          }
+          return response.json();
+        })
+        .then((data) => this.displayWeather(data));
+    },
+    displayWeather: function (data) {
+      const { name } = data;
+      const { icon, description } = data.weather[0];
+      const { temp, humidity } = data.main;
+      const { speed } = data.wind;
+      document.querySelector(".city").innerText = "Weather in " + name;
+      document.querySelector(".icon").src =
+        "https://openweathermap.org/img/wn/" + icon + ".png";
+      document.querySelector(".description").innerText = description;
+      document.querySelector(".temp").innerText = temp + "°C";
+      document.querySelector(".humidity").innerText =
+        "Humidity: " + humidity + "%";
+      document.querySelector(".wind").innerText =
+        "Wind speed: " + speed + " km/h";
+      document.querySelector(".weather").classList.remove("loading");
+      document.body.style.backgroundImage = "url('webg.jpg')";
+    },
+    search: function () {
+      const city = document.querySelector(".search-bar").value;
+      if (city) {
+        this.fetchWeather(city);
+      }
+    },
+    
+    fetchCurrentLocation: function () {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+  
+          fetch(
+            https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${this.apiKey}
+          )
+            .then((response) => {
+              if (!response.ok) {
+                alert("No weather found for current location.");
+                throw new Error("No weather found for current location.");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              this.displayWeather(data);
+            });
+        });
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    },
+  };
+  
 
-.container { 
-	display: flex; 
-	flex-direction: column; 
-	justify-content: center; 
-	align-items: center; 
-	width: 100%; 
-	height: 100vh; 
-	background-color: rgb(0, 61, 0); 
-} 
-
-h1 { 
-	color: rgb(10, 238, 10); 
-	text-align: center; 
-} 
-
-.digit { 
-	font-size: 150px; 
-	color: #fff; 
-} 
-
-.txt { 
-	font-size: 30px; 
-	color: #fffcd6; 
-} 
-
-#buttons { 
-	margin-top: 50px; 
-} 
-
-.btn { 
-	width: 100px; 
-	padding: 10px 15px; 
-	margin: 0px 20px; 
-	border-top-right-radius: 10px; 
-	border-bottom-left-radius: 10px; 
-	border-bottom-right-radius: 4px; 
-	border-top-left-radius: 4px; 
-	cursor: pointer; 
-	font-size: 20px; 
-	transition: 0.5s; 
-	color: white; 
-	font-weight: 500; 
-} 
-
-#start { 
-	background-color: #009779; 
-} 
-
-#stop { 
-	background-color: #0e85fc; 
-} 
-
-#reset { 
-	background-color: #c91400; 
-}
+  document.querySelector(".search button").addEventListener("click", function () {
+    weather.search();
+  });
+  
+  document.querySelector(".search-bar").addEventListener("keyup", function (event) {
+    if (event.key == "Enter") {
+      weather.search();
+    }
+  });
+  
+  document.querySelector(".search button:nth-child(2)").addEventListener("click", function () {
+    weather.fetchCurrentLocation();
+  });;
